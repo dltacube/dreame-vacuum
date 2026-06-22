@@ -2548,8 +2548,9 @@ class DreameMapVacuumMapEditor:
         if not map_data or not self._selected_map_id:
             return
 
+        input_areas = areas or []
         low_lying_areas = []
-        for index, area in enumerate(areas or [], 1):
+        for index, area in enumerate(input_areas, 1):
             x_coords = sorted([area[0], area[2]])
             y_coords = sorted([area[1], area[3]])
             area_size = round(abs((x_coords[1] - x_coords[0]) * (y_coords[1] - y_coords[0])) / 1000000, 2)
@@ -2605,6 +2606,15 @@ class DreameMapVacuumMapEditor:
             }
             for area in map_data.low_lying_areas
         ]
+        _LOGGER.warning(
+            "LOW_LYING_DEBUG editor payload selected_map_id=%s map_id=%s frame_id=%s input_count=%s payload_key=%s payload=%s",
+            self._selected_map_id,
+            getattr(map_data, "map_id", None),
+            getattr(map_data, "frame_id", None),
+            len(input_areas),
+            low_lying_area_key,
+            json.dumps({low_lying_area_key: areas_payload}, separators=(",", ":")),
+        )
         return {low_lying_area_key: areas_payload}
 
     def set_predefined_points(self, predefined_points) -> None:

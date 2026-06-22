@@ -1963,16 +1963,44 @@ class DreameVacuumProtocol:
         if parameters is None:
             parameters = []
 
+        low_lying_debug = bool(
+            siid == 6
+            and aiid == 2
+            and isinstance(parameters, list)
+            and any("sneak_areas" in str(parameter) for parameter in parameters)
+        )
+        action_parameters = {
+            "did": f"{siid}.{aiid}" if not self.dreame_cloud else str(self.cloud.device_id),
+            "siid": siid,
+            "aiid": aiid,
+            "in": parameters,
+        }
+        if low_lying_debug:
+            started_at = time.time()
+            original_callback = callback
+
+            def low_lying_callback(response):
+                _LOGGER.warning(
+                    "LOW_LYING_DEBUG protocol action_async response elapsed=%.3f response=%s request=%s",
+                    time.time() - started_at,
+                    response,
+                    json.dumps(action_parameters, separators=(",", ":")),
+                )
+                original_callback(response)
+
+            callback = low_lying_callback
+            _LOGGER.warning(
+                "LOW_LYING_DEBUG protocol action_async request dreame_cloud=%s retry_count=%s request=%s",
+                self.dreame_cloud,
+                retry_count,
+                json.dumps(action_parameters, separators=(",", ":")),
+            )
+
         _LOGGER.debug("Send Action Async: %s.%s %s", siid, aiid, parameters)
         self.send_async(
             callback,
             "action",
-            parameters={
-                "did": f"{siid}.{aiid}" if not self.dreame_cloud else str(self.cloud.device_id),
-                "siid": siid,
-                "aiid": aiid,
-                "in": parameters,
-            },
+            parameters=action_parameters,
             retry_count=retry_count,
         )
 

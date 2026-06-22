@@ -6192,6 +6192,22 @@ class DreameVacuumDevice:
 
     def update_map_data_async(self, parameters: dict[str, Any], cb=None):
         """Send update map action to the device."""
+        low_lying_debug = bool(
+            isinstance(parameters, dict)
+            and ("sneak_areas" in parameters or "sneak_areas_end" in parameters)
+        )
+        debug_started_at = time.time()
+        if low_lying_debug:
+            current_map = self.status.current_map
+            _LOGGER.warning(
+                "LOW_LYING_DEBUG update_map_data_async request dreame_cloud=%s has_saved_map=%s current_map_id=%s selected_map_id=%s payload=%s",
+                self._protocol.dreame_cloud,
+                self.status.has_saved_map,
+                getattr(current_map, "map_id", None),
+                getattr(self._map_manager, "_selected_map_id", None) if self._map_manager else None,
+                json.dumps(parameters, separators=(",", ":")),
+            )
+
         if self._map_manager:
             self._map_manager.schedule_update(10)
             self._property_changed(False)
@@ -6205,6 +6221,13 @@ class DreameVacuumDevice:
         ]
 
         def callback(result):
+            if low_lying_debug:
+                _LOGGER.warning(
+                    "LOW_LYING_DEBUG update_map_data_async callback elapsed=%.3f result=%s wrapped_parameters=%s",
+                    time.time() - debug_started_at,
+                    result,
+                    json.dumps(parameters, separators=(",", ":")),
+                )
             if result and result.get("code") == 0:
                 _LOGGER.info("Send action UPDATE_MAP_DATA async %s", parameters)
                 self._last_change = time.time()
@@ -6230,6 +6253,13 @@ class DreameVacuumDevice:
                     self._last_map_list_request = 0
 
         mapping = self.action_mapping[DreameVacuumAction.UPDATE_MAP_DATA]
+        if low_lying_debug:
+            _LOGGER.warning(
+                "LOW_LYING_DEBUG update_map_data_async action siid=%s aiid=%s parameters=%s",
+                mapping["siid"],
+                mapping["aiid"],
+                json.dumps(parameters, separators=(",", ":")),
+            )
         self._protocol.action_async(callback, mapping["siid"], mapping["aiid"], parameters)
 
     def update_map_data(self, parameters: dict[str, Any]) -> dict[str, Any] | None:
