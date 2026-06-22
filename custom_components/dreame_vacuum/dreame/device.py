@@ -6527,7 +6527,7 @@ class DreameVacuumDevice:
             if self.status.current_map and not self.status.has_saved_map:
                 raise InvalidActionException("Cannot edit low lying areas on current map")
 
-            return self.update_map_data(self._map_manager.editor.set_low_lying_areas(areas))
+            return self.update_map_data_async(self._map_manager.editor.set_low_lying_areas(areas))
 
     def set_predefined_points(self, points=[]) -> dict[str, Any] | None:
         """Set predefined points on current saved map."""

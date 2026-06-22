@@ -2554,26 +2554,26 @@ class DreameMapVacuumMapEditor:
             y_coords = sorted([area[1], area[3]])
             area_size = round(abs((x_coords[1] - x_coords[0]) * (y_coords[1] - y_coords[0])) / 1000000, 2)
             polygon = [
-                x_coords[0],
-                y_coords[0],
-                x_coords[1],
-                y_coords[0],
                 x_coords[1],
                 y_coords[1],
                 x_coords[0],
                 y_coords[1],
+                x_coords[0],
+                y_coords[0],
+                x_coords[1],
+                y_coords[0],
             ]
             low_lying_areas.append(
                 Polygon(
                     index,
-                    x_coords[0],
-                    y_coords[0],
-                    x_coords[1],
-                    y_coords[0],
                     x_coords[1],
                     y_coords[1],
                     x_coords[0],
                     y_coords[1],
+                    x_coords[0],
+                    y_coords[0],
+                    x_coords[1],
+                    y_coords[0],
                     polygon,
                     1,
                     0,
